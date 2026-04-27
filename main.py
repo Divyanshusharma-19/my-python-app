@@ -577,7 +577,15 @@ def predict(location):
     try:
         # Placeholder: replace with your actual model prediction call
         # result = model.predict(location) 
-        status = f"Analyzing risk for {location}..."
+        @app.route('/predict/<location>')
+def predict(location):
+    try:
+        # Call your actual model here
+        # prediction_score = model.predict(location) 
+        prediction_score = "75% Risk"  # Link this to your AI logic
+        return {"location": location, "result": prediction_score}
+    except Exception as e:
+        return {"error": str(e)}
         return {"location": location, "prediction": status, "system": "DisasterGuard v1.0"}
     except Exception as e:
         return {"error": str(e)}
