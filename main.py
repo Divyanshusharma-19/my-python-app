@@ -3,7 +3,7 @@ import threading
 import warnings
 import numpy as np
 import pandas as pd
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
 # Suppress warnings for clean deployment logs
 warnings.filterwarnings("ignore")
@@ -120,3 +120,12 @@ if __name__ == "__main__":
     # Binding to dynamic port for Railway
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+@app.route('/')
+def home():
+    # This is the "face" of your app
+    return render_template('index.html')
+
+@app.route('/predict', methods=['GET', 'POST'])
+def predict_api():
+    # This is the "brain" of your app (the JSON data)
+    # ... keep your existing prediction logic here ...
