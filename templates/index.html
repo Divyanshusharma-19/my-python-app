@@ -1,54 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DisasterGuard AI | 72hr Forecast</title>
+    <title>DisasterGuard AI | Live Prediction</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background: #0f172a; color: #f8fafc; font-family: 'Segoe UI', sans-serif; }
-        .hazard-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; transition: 0.3s; }
-        .hazard-card:hover { transform: translateY(-5px); border-color: #38bdf8; }
-        .status-high { color: #ef4444; font-weight: bold; text-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
-        .status-normal { color: #10b981; }
-        .header-bg { background: linear-gradient(90deg, #0ea5e9, #2563eb); padding: 40px 0; margin-bottom: 30px; border-radius: 0 0 30px 30px; }
+        body { background: #0f172a; color: white; font-family: sans-serif; }
+        .header-section { background: linear-gradient(135deg, #1e40af, #3b82f6); padding: 40px 0; margin-bottom: 30px; }
+        .hazard-card { background: #1e293b; border-radius: 15px; padding: 20px; border: 1px solid #334155; height: 100%; }
+        .btn-predict { background: #10b981; border: none; font-weight: bold; padding: 10px 30px; }
+        .location-badge { font-size: 1.2rem; color: #38bdf8; }
     </style>
 </head>
 <body>
-    <div class="header-bg text-center shadow">
+    <div class="header-section text-center shadow">
         <h1>🛡️ DisasterGuard AI</h1>
-        <p>Real-time Early Warning System • 72-Hour Prediction Window</p>
-    </div>
-
-    <div class="container">
-        <div class="row g-4" id="dashboard">
-            <div class="text-center"><h4>⏳ Loading live satellite & sensor data...</h4></div>
+        <p>Enter a location to analyze 72-hour disaster risk</p>
+        <div class="d-flex justify-content-center mt-3">
+            <input type="text" id="cityInput" class="form-control w-25 me-2" placeholder="Enter City (e.g. Patna)">
+            <button onclick="getPrediction()" class="btn btn-predict">PREDICT</button>
         </div>
     </div>
 
+    <div class="container">
+        <h3 class="text-center mb-4">Location Analysis: <span id="locName" class="location-badge">None</span></h3>
+        <div class="row g-4" id="results">
+            </div>
+    </div>
+
     <script>
-        async function loadForecast() {
-            const res = await fetch('/predict');
+        async function getPrediction() {
+            const city = document.getElementById('cityInput').value;
+            if(!city) return alert("Please enter a location");
+            
+            document.getElementById('results').innerHTML = '<div class="text-center">📡 Analyzing sensor data for ' + city + '...</div>';
+            
+            // Sending the location to your Python Backend
+            const res = await fetch('/predict', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ location: city })
+            });
+            
             const data = await res.json();
-            const dashboard = document.getElementById('dashboard');
+            document.getElementById('locName').innerText = data.location;
+            
+            const dashboard = document.getElementById('results');
             dashboard.innerHTML = '';
 
             for (const [key, val] of Object.entries(data.forecast)) {
-                const isHigh = val.alert_level.includes('HIGH');
                 dashboard.innerHTML += `
                     <div class="col-md-6 col-lg-3">
-                        <div class="hazard-card p-4 h-100 shadow-sm">
+                        <div class="hazard-card shadow">
                             <h5 class="text-uppercase text-secondary">${key}</h5>
-                            <h2 class="${isHigh ? 'status-high' : 'status-normal'}">${val.probability}</h2>
-                            <p class="mb-1">${val.alert_level}</p>
-                            <hr class="border-secondary">
+                            <h2 class="${val.alert_level.includes('HIGH') ? 'text-danger' : 'text-success'}">${val.probability}</h2>
+                            <p>${val.alert_level}</p>
                             <small class="text-info">${val.advisory}</small>
                         </div>
                     </div>
                 `;
             }
         }
-        loadForecast();
     </script>
 </body>
 </html>
