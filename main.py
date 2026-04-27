@@ -553,7 +553,28 @@ def main():
 
     if args.api:
         launch_api(model, port=args.port)
+from flask import Flask
+import os
+import threading
 
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "<h1>DisasterGuard AI v1.0 is Live</h1><p>The AI model is running in the background.</p>"
+
+def start_ai():
+    launch_api(model, port=args.port)
+    # Looking at your code, it might be a call to a class or a main() function
+    pass 
+
+if __name__ == "__main__":
+    # Start AI logic on a side thread
+    threading.Thread(target=start_ai, daemon=True).start()
+    
+    # Required Railway Port Binding
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
 
 if __name__ == "__main__":
     main()
