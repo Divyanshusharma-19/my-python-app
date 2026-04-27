@@ -568,13 +568,26 @@ def start_ai():
     # Looking at your code, it might be a call to a class or a main() function
     pass 
 
+# --- ADD THIS PART JUST ABOVE THE START BLOCK ---
+@app.route('/predict/<location>')
+def predict(location):
+    # This assumes 'model' is already loaded in your code
+    # If your prediction function needs more than just a name, 
+    # you can adjust the logic here.
+    try:
+        # Placeholder: replace with your actual model prediction call
+        # result = model.predict(location) 
+        status = f"Analyzing risk for {location}..."
+        return {"location": location, "prediction": status, "system": "DisasterGuard v1.0"}
+    except Exception as e:
+        return {"error": str(e)}
+
+# --- THIS IS THE ONLY START BLOCK YOU NEED ---
 if __name__ == "__main__":
-    # Start AI logic on a side thread
-    threading.Thread(target=start_ai, daemon=True).start()
+    # 1. Start the AI background logic
+    # We use threading so the AI runs while the web server stays open
+    threading.Thread(target=main, daemon=True).start()
     
-    # Required Railway Port Binding
+    # 2. Start the Web Server for Railway
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
-
-if __name__ == "__main__":
-    main()
